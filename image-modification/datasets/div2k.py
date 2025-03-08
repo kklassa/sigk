@@ -1,19 +1,25 @@
 import os
+from typing import Callable, Tuple
 import cv2
 import numpy as np
+import torch
 from torch.utils.data import Dataset
+from torchvision import transforms
 
 
 class DIV2KDataset(Dataset):
-    def __init__(self, root, transform=None):
+    def __init__(self, root: str, modification: Callable | None = None):
         self.root = root
-        self.transform = transform
-        self.image_paths = [os.path.join(root, f) for f in os.listdir(root) if f.endswith('.png')]
+        self.image_paths = [
+            os.path.join(root, f) for f in os.listdir(root) if f.endswith(".png")
+        ]
+        self.transform = transforms.ToTensor()
+        self.modification = modification
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.image_paths)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx) -> Tuple[torch.Tensor, torch.Tensor]:
         img_path = self.image_paths[idx]
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -21,7 +27,11 @@ class DIV2KDataset(Dataset):
 
         img = img.astype(np.float32) / 255.0
 
-        if self.transform:
-            img = self.transform(img)
+        img = self.transform(img)
 
-        return img
+        if self.modification:
+            modified_img = self.modification(img)
+        else:
+            modified_img = img
+
+        return modified_img, img
