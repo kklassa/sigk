@@ -108,3 +108,50 @@ class LigthDenoisingUNet(nn.Module):
         u3 = self.up3(u2, skip1)
 
         return self.final(u3)
+    
+
+class InpaintingUNet(nn.Module):
+    """U-Net model for image inpainting"""
+    def __init__(self, in_channels: int = 4, out_channels: int = 3):
+        super(InpaintingUNet, self).__init__()
+
+        self.down1 = Down(in_channels, 64)
+        self.down2 = Down(64, 128)
+        self.down3 = Down(128, 256)
+        self.down4 = Down(256, 512)
+
+        self.bottleneck = ConvBlock(512, 1024)
+
+        self.up1 = Up(1024, 512)
+        self.up2 = Up(512, 256)
+        self.up3 = Up(256, 128)
+        self.up4 = Up(128, 64)
+
+        self.final_conv = nn.Conv2d(64, out_channels, kernel_size=1)
+
+    def forward(self, x: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass of the U-Net.
+        :param x: Masked image (B, 3, H, W)
+        :param mask: Binary mask (B, 1, H, W) where 0 = missing pixels, 1 = valid pixels
+        """
+        # Concatenate the mask with the input image along the channel dimension
+        x = torch.cat((x, mask), dim=1)
+
+        # Encoder (Downsampling)
+        skip1, d1 = self.down1(x)
+        skip2, d2 = self.down2(d1)
+        skip3, d3 = self.down3(d2)
+        skip4, d4 = self.down4(d3)
+
+        # Bottleneck
+        bottleneck = self.bottleneck(d4)
+
+        # Decoder (Upsampling with Skip Connections)
+        up1 = self.up1(bottleneck, skip4)
+        up2 = self.up2(up1, skip3)
+        up3 = self.up3(up2, skip2)
+        up4 = self.up4(up3, skip1)
+
+        return self.final_conv(up4)
+
