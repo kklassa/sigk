@@ -20,7 +20,7 @@ def add_random_mask(
     Generate a random mask and apply it to the image.
     """
     _, h, w = img.shape
-    mask = torch.ones_like(img)
+    mask = torch.ones((1, h, w), dtype=img.dtype, device=img.device) 
 
     for _ in range(num_patches):
         # Randomly select the top-left corner of each mask
