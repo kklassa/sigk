@@ -15,6 +15,7 @@ class PhongWindow(BaseWindow):
     def __init__(self, **kwargs):
         super(PhongWindow, self).__init__(**kwargs)
         self.frame = 0
+        self.param_buffer = []
 
     def init_shaders_variables(self):
         self.model_view_projection = self.program["model_view_projection"]
@@ -26,6 +27,9 @@ class PhongWindow(BaseWindow):
 
     def on_render(self, time: float, frame_time: float):
         if self.frame >= self.frame_count:
+            with open(os.path.join(self.output_path, "dataset.json"), "w") as f:
+                json.dump(self.param_buffer, f, indent=2)
+
             self.wnd.close()
             return
 
@@ -78,6 +82,7 @@ class PhongWindow(BaseWindow):
             img.save(os.path.join(self.output_path, f'images/{filename}.png'))
 
             params = {
+                "image_filename": f"{filename}.png",
                 "model_translation_relative": camera_relative_translation.tolist(),
                 "material_diffuse": material_diffuse,
                 "material_shininess": material_shininess,
@@ -85,8 +90,5 @@ class PhongWindow(BaseWindow):
                 "camera_position": camera_position,
                 "frame": self.frame
             }
-
-            with open(os.path.join(self.output_path, f"params/{filename}.json"), "w") as f:
-                json.dump(params, f, indent=2)
-
+            self.param_buffer.append(params)
             self.frame += 1

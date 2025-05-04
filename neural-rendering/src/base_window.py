@@ -19,9 +19,7 @@ class BaseWindow(WindowConfig):
         super(BaseWindow, self).__init__(**kwargs)
         self.output_path = self.argv.output_path
         if self.argv.output_path:
-            os.makedirs(name=self.output_path, exist_ok=True)
             os.makedirs(name=os.path.join(self.output_path, 'images'), exist_ok=True)
-            os.makedirs(name=os.path.join(self.output_path, 'params'), exist_ok=True)
 
         self.frame_count = self.argv.frame_count
 
