@@ -1,7 +1,9 @@
 import os.path
 
+import json
 import moderngl
 import numpy as np
+import random
 from PIL import Image
 from pyrr import Matrix44
 
@@ -23,14 +25,29 @@ class PhongWindow(BaseWindow):
         self.camera_position = self.program["camera_position"]
 
     def on_render(self, time: float, frame_time: float):
+        if self.frame >= self.frame_count:
+            self.wnd.close()
+            return
+
         self.ctx.clear(0.0, 0.0, 0.0, 0.0)
         self.ctx.enable(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
 
-        # todo: Randomize
-        model_translation = [5.0, 0.0, 0.0]
-        material_diffuse = [1.0, 0.0, 0.0]
-        material_shininess = 5
-        light_position = [15.0, 5.0, 0.0]
+        model_translation = [
+            random.uniform(-10.0, 10.0),
+            random.uniform(-10.0, 10.0),
+            random.uniform(-20.0, 0.0)
+        ]
+        material_diffuse = [
+            random.randint(0, 255) / 255.0, 
+            random.randint(0, 255) / 255.0,
+            random.randint(0, 255) / 255.0
+        ]
+        material_shininess = random.uniform(3.0, 20.0)
+        light_position = [
+            random.uniform(-20.0, 20.0),
+            random.uniform(-20.0, 20.0),
+            random.uniform(-20.0, 20.0)
+        ]
 
         camera_position = [5.0, 5.0, 15.0]
         model_matrix = Matrix44.from_translation(model_translation)
@@ -41,6 +58,7 @@ class PhongWindow(BaseWindow):
             (0.0, 1.0, 0.0),
         )
 
+        camera_relative_translation = np.array(model_translation) - np.array(camera_position)
         model_view_projection = proj * lookat * model_matrix
 
         self.model_view_projection.write(model_view_projection.astype('f4').tobytes())
@@ -52,9 +70,23 @@ class PhongWindow(BaseWindow):
 
         self.vao.render()
         if self.output_path:
+            filename = f"image_{self.frame:04}"
             img = (
                 Image.frombuffer('RGBA', self.wnd.size, self.wnd.fbo.read(components=4))
                      .transpose(Image.Transpose.FLIP_TOP_BOTTOM)
             )
-            img.save(os.path.join(self.output_path, f'image_{self.frame:04}.png'))
+            img.save(os.path.join(self.output_path, f'images/{filename}.png'))
+
+            params = {
+                "model_translation_relative": camera_relative_translation.tolist(),
+                "material_diffuse": material_diffuse,
+                "material_shininess": material_shininess,
+                "light_position": light_position,
+                "camera_position": camera_position,
+                "frame": self.frame
+            }
+
+            with open(os.path.join(self.output_path, f"params/{filename}.json"), "w") as f:
+                json.dump(params, f, indent=2)
+
             self.frame += 1
