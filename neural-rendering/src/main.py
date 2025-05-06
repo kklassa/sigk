@@ -23,7 +23,7 @@ class TaskType(Enum):
             "--shader_name=phong",
             "--model_name=sphere.obj",
             "--output_path=../output/",
-            "--frame_count=10000",
+            "--frame_count=2000",
         ],
         PhongWindow
     )

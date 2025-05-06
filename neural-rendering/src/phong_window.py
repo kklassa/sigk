@@ -83,7 +83,7 @@ class PhongWindow(BaseWindow):
 
             params = {
                 "image_filename": f"{filename}.png",
-                "model_translation": model_translation,
+                "model_translation_relative": camera_relative_translation.tolist(),
                 "material_diffuse": material_diffuse,
                 "material_shininess": material_shininess,
                 "light_position": light_position,
