@@ -37,9 +37,9 @@ class PhongWindow(BaseWindow):
         self.ctx.enable(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
 
         model_translation = [
-            random.uniform(-10.0, 10.0),
-            random.uniform(-10.0, 10.0),
-            random.uniform(-20.0, 0.0)
+            random.uniform(-5.0, 5.0),
+            random.uniform(-5.0, 3.0),
+            random.uniform(-15.0, 5.0)
         ]
         material_diffuse = [
             random.randint(0, 255) / 255.0, 
@@ -83,7 +83,7 @@ class PhongWindow(BaseWindow):
 
             params = {
                 "image_filename": f"{filename}.png",
-                "model_translation_relative": camera_relative_translation.tolist(),
+                "model_translation": model_translation,
                 "material_diffuse": material_diffuse,
                 "material_shininess": material_shininess,
                 "light_position": light_position,
