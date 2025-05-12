@@ -21,9 +21,9 @@ class TaskType(Enum):
         [
             "--shaders_dir_path=../resources/shaders/phong",
             "--shader_name=phong",
-            "--model_name=sphere_v2.obj",
-            "--output_path=../output/",
-            "--frame_count=2000",
+            "--model_name=monkey.obj",
+            "--output_path=../output_monkey/",
+            "--frame_count=10000",
         ],
         PhongWindow
     )

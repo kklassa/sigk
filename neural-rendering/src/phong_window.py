@@ -41,6 +41,16 @@ class PhongWindow(BaseWindow):
             random.uniform(-5.0, 3.0),
             random.uniform(-15.0, 5.0)
         ]
+        rotation_angles = [
+            random.uniform(0.0, 2 * np.pi),
+            random.uniform(0.0, 2 * np.pi),
+            random.uniform(0.0, 2 * np.pi),
+        ]
+        rotation_x = Matrix44.from_x_rotation(rotation_angles[0])
+        rotation_y = Matrix44.from_y_rotation(rotation_angles[1])
+        rotation_z = Matrix44.from_z_rotation(rotation_angles[2])
+        rotation_matrix = rotation_z * rotation_y * rotation_x
+
         material_diffuse = [
             random.randint(0, 255) / 255.0, 
             random.randint(0, 255) / 255.0,
@@ -54,7 +64,8 @@ class PhongWindow(BaseWindow):
         ]
 
         camera_position = [5.0, 5.0, 15.0]
-        model_matrix = Matrix44.from_translation(model_translation)
+        # model_matrix = Matrix44.from_translation(model_translation)
+        model_matrix = Matrix44.from_translation(model_translation) * rotation_matrix
         proj = Matrix44.perspective_projection(45.0, self.aspect_ratio, 0.1, 1000.0)
         lookat = Matrix44.look_at(
             camera_position,
@@ -62,7 +73,8 @@ class PhongWindow(BaseWindow):
             (0.0, 1.0, 0.0),
         )
 
-        camera_relative_translation = np.array(model_translation) - np.array(camera_position)
+        model_relative_translation = np.array(model_translation) - np.array(camera_position)
+        light_relative_position = np.array(light_position) - np.array(camera_position)
         model_view_projection = proj * lookat * model_matrix
 
         self.model_view_projection.write(model_view_projection.astype('f4').tobytes())
@@ -83,9 +95,12 @@ class PhongWindow(BaseWindow):
 
             params = {
                 "image_filename": f"{filename}.png",
-                "model_translation_relative": camera_relative_translation.tolist(),
+                "model_translation_relative": model_relative_translation.tolist(),
+                "model_translation": model_translation,
+                "model_rotation": rotation_angles,
                 "material_diffuse": material_diffuse,
                 "material_shininess": material_shininess,
+                "light_position_relative": light_relative_position.tolist(),
                 "light_position": light_position,
                 "camera_position": camera_position,
                 "frame": self.frame
