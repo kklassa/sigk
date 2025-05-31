@@ -15,3 +15,7 @@ Models for image generation were trained on the [MedMNIST](https://medmnist.com/
 ## Neural Rendering
 
 Models for neural rendering were trained based on images created using a custom 3D renderer.
+
+## Animation Interpolation
+
+Models for animation frame interpolation were trained on [AnimeInterp](AnimeInterp) dataset.
